@@ -58,7 +58,7 @@ Run the following command for testing with IrisFormer:
 ```
 python test.py --position_embedding rope2d --ft_pool map --save_report
 ```
-or run the following command for testing with the original ViT:
+or run the following command for testing with the vanilla ViT:
 ```
 python test.py --position_embedding learnable --ft_pool cls --save_report
 ```
