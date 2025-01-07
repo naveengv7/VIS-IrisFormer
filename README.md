@@ -1,6 +1,6 @@
 # IrisFormer
 
-This is the official Pytorch implementation of IrisFormer. We have submitted the paper to a journal for possible publication.
+This is the official Pytorch implementation of IrisFormer.
 
 <br>
 
@@ -29,7 +29,23 @@ Train/test splitting protocols should go to the ```Protocal``` folder. We have p
 <br>
 
 ## Training
-The training codes will be publicly available upon acceptance.
+Download ImageNet pretrained weights from [Google Drive](https://drive.google.com/file/d/1GyFUt4f3RXi4UgscgjkCfycgcJBUSjL2/view?usp=sharing) and save it in the ```model``` folder, or you may use some better pretrained weights to achieve better model performance.
+
+Choose the dataset on which you would like to train the models by modifying the ```main``` function in ```train.py```.
+
+Then run the following command to train IrisFormer:
+```
+python train.py --position_embedding rope2d --ft_pool map --shift_pixel 14 --shift_posibility 0.5 --mask_ratio 0.75 --test_while_train --save_name your_run_name
+```
+
+or run the following command to train a vanilla ViT:
+```
+python train.py --position_embedding learnable --ft_pool cls --test_while_train --save_name your_run_name
+```
+
+add ```--wandb``` to enable wandb logging. Checkpoints and log files will be saved in the ```./checkpoint/your_run_name/``` folder.
+
+Please refer to the ```./args_config/train_config.py``` for more detailed hyperparameter settings and other choices of model structures.
 
 <br>
 
