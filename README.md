@@ -14,7 +14,7 @@ scikit-learn
 pyeer
 numpy
 pandas
-wandb
+wandb (optional)
 ```
 
 <br>
