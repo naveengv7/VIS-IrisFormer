@@ -1,6 +1,6 @@
 # IrisFormer
 
-This is the official Pytorch implementation of IrisFormer.
+This is the official Pytorch implementation of IrisFormer. Please refer to our paper [here](https://ieeexplore.ieee.org/document/10816462).
 
 <br>
 
