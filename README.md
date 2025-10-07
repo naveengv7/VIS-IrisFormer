@@ -100,7 +100,7 @@ Results and evaluation reports will be saved in the `eval/` directory.
 If you use this work, please cite our upcoming paper:
 
 ```
-@article{YourName2025VISIrisFormer,
+@article{2025VISIrisFormer,
   title={IrisFormer (VIS Adaptation): Transformer for Visible Spectrum Iris Recognition},
   author={YourName, et al.},
   journal={To appear},
