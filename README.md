@@ -1,76 +1,119 @@
-# IrisFormer
+# IrisFormer (VIS Adaptation): Transformer for Visible Spectrum Iris Recognition
 
-This is the official Pytorch implementation of IrisFormer. Please refer to our paper [here](https://ieeexplore.ieee.org/document/10816462).
+This repository extends the original [IrisFormer](https://github.com/XianyunSun/IrisFormer) framework to the **visible spectrum (VIS)** iris recognition setting.  
+It introduces modifications and training protocols specifically aimed at addressing the challenges of **illumination variability**, **pigmentation**, and **blur** commonly encountered in VIS iris imaging.  
 
-<br>
+Our trained VIS model achieves **state-of-the-art performance** across standard VIS iris benchmarks (UBIRIS.v1, UBIRIS.v2, MICHE, and CUVIRIS) and is released for reproducible research.
 
-## Environment
-Packages needed by this project:
+---
+
+## 🔍 Overview
+
+Unlike traditional handcrafted iris recognition systems (e.g., OSIRIS), which encode phase responses into binary iris codes, **IrisFormer** leverages transformer-based attention to learn **patch-wise embeddings** directly from normalized iris strips.  
+Our VIS adaptation retains the original model’s transformer backbone but integrates training and augmentation strategies tailored to the visible-light domain.
+
+### Key Design Highlights
+- **2D Relative Positional Encoding (RoPE)** — handles horizontal misalignments caused by residual eye rotation after normalization.  
+- **Horizontal Pixel-Shift Augmentation** — simulates small rotational offsets between captures.  
+- **Random Token Masking** — increases robustness to local occlusions and specular reflections.  
+- **Patch-wise Sequential Matching** — preserves fine-grained texture and maintains local similarity signals.
+
+---
+
+## 🧠 Input Representation
+
+- **Input:** Normalized grayscale iris image, size `64 × 512`.  
+- The image is tokenized into non-overlapping patches, linearly projected to a fixed embedding dimension, and passed through a transformer encoder stack.  
+- Final features are extracted as the **full sequence of patch embeddings**, matched via cosine similarity in a patch-wise sequential fashion.
+
+---
+
+## ⚙️ Training Setup
+
+| Setting | Value |
+|----------|-------|
+| Dataset | UBIRIS.v2 (Visible Spectrum) |
+| Pretraining | ImageNet-1k |
+| Optimizer | AdamW (weight decay 0.05) |
+| Learning Rate | 1 × 10⁻⁴ with cosine annealing |
+| Batch Size | 32 |
+| Epochs | 100 |
+| Loss | Margin-based Triplet Loss |
+| Augmentation | Horizontal pixel-shift + Random token masking |
+
+All other architectural details follow the original [IrisFormer paper](https://github.com/XianyunSun/IrisFormer).
+
+---
+
+## 🧪 Evaluation Protocol
+
+The evaluation setup mirrors the OSIRIS protocol for fairness.  
+We train on **UBIRIS.v2** and perform **cross-dataset verification** on:
+- **UBIRIS.v1**
+- **MICHE**
+- **CUVIRIS**
+
+### Reported Metrics
+- Biometric: FAR, FRR, EER, DET  
+- Statistical: GMean, GSTD, IMean, ISTD, *d′*, AUC, ZeroFMR, ZeroFNMR  
+
+These collectively assess both separability and score distribution stability under VIS conditions.
+
+---
+
+## 💾 Pretrained Model
+
+A trained **Visible IrisFormer (VIS)** model is available for download:
+
+📦 **[Download Trained Model (Google Drive)](https://drive.google.com/file/d/1kEOfbw7DEGKVuzRQr7dDhQVXAjqudxVd/view?usp=sharing)**
+
+Place the downloaded weights under:
 ```
-pytorch
-torchvision
-PIL
-scikit-learn
-pyeer
-numpy
-pandas
-wandb (optional)
+./checkpoint/VIS-IrisFormer/
 ```
 
-<br>
+---
 
-## Data Preparation
-IrisFormer takes normalized iris images as inputs, and all normalized images should be resized to 64*512. We deployed the Hough circle detection<sup>1</sup> to locate iris regions, and utilized the rubber-sheet model<sup>2</sup> to transform the ring-like regions into rectangles. We also applied the same contrast enhancement process as UniNet<sup>3</sup> to the normalized iris images.
+## 🚀 Usage
 
-Paths to the datasets are stored in the config files in the ```data_config``` folder, and you may modify them.
-
-Train/test splitting protocols should go to the ```Protocal``` folder. We have placed example files there.
-
-<br>
-
-## Training
-Download ImageNet pretrained weights from [Google Drive](https://drive.google.com/file/d/1GyFUt4f3RXi4UgscgjkCfycgcJBUSjL2/view?usp=sharing) and save it in the ```model``` folder, or you may use some better pretrained weights to achieve better model performance.
-
-Choose the dataset on which you would like to train the models by modifying the ```main``` function in ```train.py```.
-
-Then run the following command to train IrisFormer:
-```
-python train.py --position_embedding rope2d --ft_pool map --shift_pixel 14 --shift_posibility 0.5 --mask_ratio 0.75 --test_while_train --save_name your_run_name
+### Environment Setup
+```bash
+pip install torch torchvision pillow scikit-learn pyeer numpy pandas wandb
 ```
 
-or run the following command to train a vanilla ViT:
+### Training
+```bash
+python train.py     --position_embedding rope2d     --ft_pool map     --shift_pixel 14     --shift_posibility 0.5     --mask_ratio 0.75     --test_while_train     --save_name VIS_IrisFormer
 ```
-python train.py --position_embedding learnable --ft_pool cls --test_while_train --save_name your_run_name
+
+### Testing
+```bash
+python test.py     --position_embedding rope2d     --ft_pool map     --save_report     --run_name VIS_IrisFormer
 ```
 
-add ```--wandb``` to enable wandb logging. Checkpoints and log files will be saved in the ```./checkpoint/your_run_name/``` folder.
+Results and evaluation reports will be saved in the `eval/` directory.
 
-Please refer to the ```./args_config/train_config.py``` for more detailed hyperparameter settings and other choices of model structures.
+---
 
-<br>
+## 🧾 Citation
 
-## Testing
-Download model parameters from [Google Drive](https://drive.google.com/drive/folders/1p7yqLePpVfuf4n-PFMxnbmRwCqjx6GQB?usp=drive_link) and save them in the ```checkpoint``` folder.
+If you use this work, please cite our upcoming paper:
 
-Modify the ```run_name``` in the ```main``` function in ```test.py``` to the name of the model you want to test.
-
-Run the following command for testing with IrisFormer:
 ```
-python test.py --position_embedding rope2d --ft_pool map --save_report
+@article{YourName2025VISIrisFormer,
+  title={IrisFormer (VIS Adaptation): Transformer for Visible Spectrum Iris Recognition},
+  author={YourName, et al.},
+  journal={To appear},
+  year={2025},
+  note={Preprint available soon}
+}
 ```
-or run the following command for testing with the vanilla ViT:
-```
-python test.py --position_embedding learnable --ft_pool cls --save_report
-```
-Results will be saved in a ```eval``` folder under the same directory with the model parameters.
 
-Please refer to the ```./args_config/test_config.py``` for more detailed settings.
+A link to the final paper will be updated here once published.
 
-<br>
+---
 
-## References
-1: Wildes, Richard P. "Iris recognition: an emerging biometric technology." Proceedings of the IEEE 85.9 (1997): 1348-1363.
+## 🙏 Acknowledgements
 
-2: Daugman, John G. "High confidence visual recognition of persons by a test of statistical independence." IEEE transactions on pattern analysis and machine intelligence 15.11 (1993): 1148-1161.
-
-3: Zhao, Zijing, and Ajay Kumar. "Towards more accurate iris recognition using deeply learned spatially corresponding features." Proceedings of the IEEE international conference on computer vision. 2017.
+This implementation builds upon the original [IrisFormer](https://github.com/XianyunSun/IrisFormer) by **Xianyun Sun et al. (IEEE SPL, 2024)**.  
+We extend the framework for **Visible Spectrum Iris Recognition** and release our trained models for research reproducibility.
